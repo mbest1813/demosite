@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retail Demo Site - Checkout</title>
+</head>
+<body>
+  <h1>Checkout</h1>
+  <nav>
+    <a href="index.html">Home</a> |
+    <a href="product.html">Shop More</a>
+  </nav>
+  <p>Total: $30.00</p>
+  <button onclick="completePurchase()">Complete Purchase</button>
+
+  <script>
+    function completePurchase() {
+      gtag('event', 'purchase', {
+        'transaction_id': 'T12345',
+        'value': 30.00,
+        'currency': 'USD',
+        'items': [
+          { 'item_name': 'Product A', 'price': 10 },
+          { 'item_name': 'Product B', 'price': 20 }
+        ]
+      });
+      alert("Thank you for your purchase!");
+    }
+  </script>
+</body>
+</html>
