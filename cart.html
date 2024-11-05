@@ -11,7 +11,41 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'G-H6N3PSJH6G');
+  // Direct all GA4 events to MetaRouter’s custom endpoint
+  gtag('config', 'G-H6N3PSJH6G', {
+    'transport_url': 'http://api.demo-prod.mr-in.com/v1/custom/event'
+  });
+
+  function generateUniqueId() {
+    return 'msg_' + Math.random().toString(36).substr(2, 9); // Simple unique ID generator
+  }
+
+  function sendEnrichedEvent(eventName, eventType, anonymousId, additionalParams = {}) {
+    gtag('event', eventName, {
+      'writeKey': 'matt_ga4_test',           // Static value for MetaRouter writeKey
+      'messageId': generateUniqueId(),       // Unique ID for each event
+      'eventName': eventName,                // Event name
+      'type': eventType,                     // Event type (e.g., "page", "track", "identify")
+      'anonymousId': anonymousId || generateUniqueId(), // Anonymous ID, unique for each user
+      ...additionalParams                    // Any additional event-specific parameters
+    });
+  }
+
+  // Example of sending a page view event
+  sendEnrichedEvent('page_view', 'page', 'user_123456', {
+    'eventType': 'page'
+  });
+
+  // Adding an 'Add to Cart' event for a button
+  document.getElementById('addToCartButton').addEventListener('click', function() {
+    sendEnrichedEvent('add_to_cart', 'track', 'user_123456', {
+      'eventType': 'track',
+      'item_name': 'Sample Product',
+      'item_price': 20.00,
+      'currency': 'USD',
+      'quantity': 1
+    });
+  });
 </script>
 </head>
 <body>
