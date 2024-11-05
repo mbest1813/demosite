@@ -4,46 +4,68 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Retail Demo Site - Cart</title>
-  <!-- Google tag (gtag.js) -->
+  <!-- Google Analytics and MetaRouter Combined Script -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-H6N3PSJH6G"></script>
 <script>
+  // Initialize GA4
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  // Direct all GA4 events to MetaRouter’s custom endpoint
-  gtag('config', 'G-H6N3PSJH6G', {
-    'transport_url': 'https://api.demo-prod.mr-in.com/v1/custom/event'
-  });
+  // Standard GA4 configuration to send data directly to Google Analytics
+  gtag('config', 'G-H6N3PSJH6G');
 
+  // Helper function to generate unique message IDs
   function generateUniqueId() {
-    return 'msg_' + Math.random().toString(36).substr(2, 9); // Simple unique ID generator
+    return 'msg_' + Math.random().toString(36).substr(2, 9);
   }
 
-  function sendEnrichedEvent(eventName, eventType, anonymousId, additionalParams = {}) {
-    gtag('event', eventName, {
-      'writeKey': 'matt_ga4_test',           // Static value for MetaRouter writeKey
-      'messageId': generateUniqueId(),       // Unique ID for each event
-      'eventName': eventName,                // Event name
-      'type': eventType,                     // Event type (e.g., "page", "track", "identify")
-      'anonymousId': anonymousId || generateUniqueId(), // Anonymous ID, unique for each user
-      ...additionalParams                    // Any additional event-specific parameters
+  // Function to send enriched event data to MetaRouter
+  function sendToMetaRouter(eventName, eventType, anonymousId, additionalParams = {}) {
+    const payload = {
+      writeKey: 'matt_ga4_test',              // MetaRouter writeKey
+      messageId: generateUniqueId(),          // Unique ID for each event
+      eventName: eventName,                   // Event name
+      type: eventType,                        // Event type (e.g., "page", "track", "identify")
+      anonymousId: anonymousId || generateUniqueId(), // Anonymous ID, unique for each user
+      ...additionalParams                     // Additional event-specific parameters
+    };
+
+    // Send enriched event to MetaRouter
+    fetch('https://api.demo-prod.mr-in.com/v1/custom/event', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }).then(response => {
+      console.log('Event sent to MetaRouter:', eventName);
+    }).catch(error => {
+      console.error('Error sending event:', error);
     });
   }
 
-  // Example of sending a page view event
-  sendEnrichedEvent('page_view', 'page', 'user_123456', {
-    'eventType': 'page'
-  });
+  // Example event for a page view
+  gtag('event', 'page_view'); // Send page_view to GA4
+  sendToMetaRouter('page_view', 'page', 'user_123456', { eventType: 'page' }); // Send page_view to MetaRouter
 
-  // Adding an 'Add to Cart' event for a button
+  // Add to Cart Button - Example with both GA4 and MetaRouter
   document.getElementById('addToCartButton').addEventListener('click', function() {
-    sendEnrichedEvent('add_to_cart', 'track', 'user_123456', {
-      'eventType': 'track',
-      'item_name': 'Sample Product',
-      'item_price': 20.00,
-      'currency': 'USD',
-      'quantity': 1
+    // Send event to GA4 as usual
+    gtag('event', 'add_to_cart', {
+      item_name: 'Sample Product',
+      item_price: 20.00,
+      currency: 'USD',
+      quantity: 1
+    });
+
+    // Send enriched data to MetaRouter separately
+    sendToMetaRouter('add_to_cart', 'track', 'user_123456', {
+      eventType: 'track',
+      item_name: 'Sample Product',
+      item_price: 20.00,
+      currency: 'USD',
+      quantity: 1
     });
   });
 </script>
